@@ -76,7 +76,18 @@ def template_globals():
 
 
 # ---------------- Dashboard ----------------
+@app.route("/debug-env")
+def debug_env():
+    return {
+        k: str(v)
+        for k, v in request.environ.items()
+        if isinstance(v, (str, int, float, bool))
+    }
+
+
 @app.route("/")
+@app.route("/api/index")
+@app.route("/api")
 def dashboard():
     def count(sql):
         return query(sql, one=True)["c"]
