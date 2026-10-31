@@ -19,6 +19,10 @@ def db():
     """Open one MySQL connection per HTTP request."""
     if "db" not in g:
         use_ssl = os.getenv("DB_SSL", "false").lower() == "true"
+        ssl_config = None
+        if use_ssl:
+            ca_path = os.path.join(BASE_DIR, "ca.pem")
+            ssl_config = {"ca": ca_path} if os.path.exists(ca_path) else {"ssl_mode": "REQUIRED"}
         g.db = pymysql.connect(
             host=os.getenv("DB_HOST", "localhost"),
             port=int(os.getenv("DB_PORT", "3306")),
@@ -27,7 +31,7 @@ def db():
             database=os.getenv("DB_NAME", "blood_network"),
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True,
-            ssl={"ca": os.path.join(BASE_DIR, "ca.pem")} if use_ssl else None,
+            ssl=ssl_config,
         )
     return g.db
 
