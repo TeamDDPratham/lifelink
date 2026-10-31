@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeLink · Blood Donor Network</title>
+<meta name="description" content="LifeLink – Blood Donor Availability Network. A demo of the RDBMS lab project featuring donors, requests, donations, and blood bank management.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#1f2937;--muted:#6b7280;--border:#e5e7eb;--red:#dc2626;--red-dark:#b91c1c;--side:#111827}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.app{display:flex;min-height:100vh}
+.side{width:230px;background:var(--side);padding:24px 14px;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:20px;margin:0 8px 30px}
+.brand i{color:var(--red);font-size:26px}
+.nav{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:#9ca3af;cursor:pointer;font-weight:500;margin-bottom:4px}
+.nav i{font-size:18px}.nav:hover{background:#1f2937;color:#fff}.nav.on{background:var(--red);color:#fff}
+.foot{margin-top:auto;font-size:12px;color:#6b7280;padding:0 8px;line-height:1.6}
+.main{margin-left:230px;flex:1;padding:28px 32px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px}
+.top h1{font-size:24px}.top p{color:var(--muted);margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:18px;overflow-x:auto}
+.card h3{font-size:15px;font-weight:600;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px}
+.stat{display:flex;justify-content:space-between;align-items:center;margin:0}
+.stat .l{color:var(--muted);font-size:13px}.stat .v{font-size:28px;font-weight:700;margin-top:4px}
+.ic{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-size:22px}
+.c1{background:#dbeafe;color:#2563eb}.c2{background:#dcfce7;color:#16a34a}.c3{background:#fef3c7;color:#d97706}.c4{background:#fee2e2;color:var(--red)}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:10px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}tbody tr:hover{background:#fafafa}
+.sub{color:var(--muted);font-size:12px;margin-top:2px}
+.bd{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-red{background:#fee2e2;color:var(--red)}.b-ok{background:#dcfce7;color:#16a34a}.b-warn{background:#fef3c7;color:#b45309}.b-info{background:#dbeafe;color:#2563eb}.b-mut{background:#f3f4f6;color:var(--muted)}.b-crit{background:var(--red);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.bp{background:var(--red);color:#fff}.bp:hover{background:var(--red-dark)}.bg{background:#f3f4f6;color:var(--text)}.bg:hover{background:#e5e7eb}
+select,input{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;background:#fff}
+select:focus,input:focus{outline:2px solid #fecaca;border-color:var(--red)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.flash{padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;align-items:center}
+.f-ok{background:#dcfce7;color:#166534}.f-err{background:#fee2e2;color:#991b1b}
+.item{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.item:last-child{border-bottom:none}
+.bars{display:flex;gap:6px;height:180px;align-items:flex-end}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.bar .pair{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:4px}
+.bar .pair div{width:14px;border-radius:4px 4px 0 0}
+.leg{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:10px}
+.leg span span{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.empty{text-align:center;color:var(--muted);padding:24px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.sum strong{display:block;margin-top:4px;font-size:15px}
+.hint{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:900px){
+ .app{flex-direction:column}.side{position:static;width:100%;padding:14px}
+ .brand{margin-bottom:12px}.navs{display:flex;overflow-x:auto;gap:4px}.nav{margin:0;white-space:nowrap}.foot{display:none}
+ .main{margin-left:0;padding:18px}.stats{grid-template-columns:repeat(2,1fr)}.two,.form,.sum{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><i class="ti ti-droplet-filled"></i>LifeLink</div>
+    <div class="navs">
+      <div class="nav on" data-p="dash"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+      <div class="nav" data-p="donors"><i class="ti ti-users"></i>Donors</div>
+      <div class="nav" data-p="reqs"><i class="ti ti-clipboard-heart"></i>Requests</div>
+      <div class="nav" data-p="dons"><i class="ti ti-heartbeat"></i>Donations</div>
+      <div class="nav" data-p="banks"><i class="ti ti-building-hospital"></i>Blood Banks</div>
+    </div>
+    <div class="foot">Blood Donor Availability Network<br>RDBMS Lab Project · Demo</div>
+  </aside>
+  <main class="main" id="page"></main>
+</div>
+<script>
+const G=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+const COMPAT={'O-':['O-'],'O+':['O-','O+'],'A-':['O-','A-'],'A+':['O-','O+','A-','A+'],'B-':['O-','B-'],'B+':['O-','O+','B-','B+'],'AB-':['O-','A-','B-','AB-'],'AB+':G};
+const URGORDER=['Critical','High','Medium','Low'];
+let donors=[['Aarav Sharma','O-','Jaipur',30,28,'9810000001'],['Priya Meena','A+','Jaipur',5,25,'9810000002'],['Rohan Gupta','B+','Jaipur',120,31,'9810000003'],['Sneha Rathore','O-','Jaipur',null,26,'9810000004'],['Kabir Singh','AB+','Delhi',null,33,'9810000005'],['Ananya Verma','O+','Delhi',45,27,'9810000006'],['Vikram Choudhary','O-','Delhi',null,36,'9810000007'],['Isha Patel','A-','Mumbai',null,24,'9810000008'],['Arjun Nair','B-','Mumbai',200,28,'9810000009'],['Meera Joshi','AB-','Mumbai',null,32,'9810000010'],['Dev Saini','O+','Jaipur',null,23,'9810000011'],['Kavya Agarwal','B+','Jaipur',null,30,'9810000012']].map((d,i)=>({id:i+1,name:d[0],g:d[1],city:d[2],last:d[3],age:d[4],phone:d[5]}));
+let reqs=[['Ramesh Kumar','O-',2,'Pink City Hospital','Jaipur','Critical'],['Sunita Devi','A+',1,'City Care Hospital','Jaipur','High'],['Mohit Arora','B+',3,'Metro Heart Institute','Delhi','Medium'],['Farah Khan','AB-',1,'Seaside General Hospital','Mumbai','High'],['Gopal Yadav','O+',1,'Pink City Hospital','Jaipur','Low']].map((r,i)=>({id:i+1,p:r[0],g:r[1],u:r[2],h:r[3],city:r[4],urg:r[5],st:'Open',got:0}));
+const banks=[['Sanjeevani Blood Bank','Jaipur','MI Road'],['Jeevan Blood Centre','Jaipur','Malviya Nagar'],['Arogya Blood Bank','Delhi','Karol Bagh'],['LifeLine Blood Centre','Mumbai','Andheri East']].map((b,i)=>({id:i+1,name:b[0],city:b[1],addr:b[2]}));
+let dons=[[1,1,30],[3,1,120],[6,3,45],[9,4,200],[2,2,5]].map(d=>({donor:d[0],bank:d[1],ago:d[2],units:1,req:null}));
+const URG={Critical:'b-crit',High:'b-warn',Medium:'b-info',Low:'b-mut'},ST={Open:'b-warn',Fulfilled:'b-ok',Cancelled:'b-mut'};
+const elig=d=>d.last===null||d.last>=90, left=d=>elig(d)?0:90-d.last;
+const fmt=a=>{if(a===null)return'Never';const t=new Date();t.setDate(t.getDate()-a);return t.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
+const bg=g=>`<span class="bd b-red">${g}</span>`;
+const page=document.getElementById('page');
+let flash='',filt={g:'',city:'',el:''};
+const head=(t,s,b='')=>`${flash}<div class="top"><div><h1>${t}</h1><p>${s}</p></div>${b}</div>`;
+const msg=(ok,t)=>flash=`<div class="flash ${ok?'f-ok':'f-err'}"><i class="ti ti-${ok?'circle-check':'alert-octagon'}"></i>${t}</div>`;
+const done=()=>{flash='';window.scrollTo(0,0)};
+function dash(){
+  const el=donors.filter(elig).length,open=reqs.filter(r=>r.st==='Open').length;
+  const units=dons.filter(d=>d.ago<new Date().getDate()).reduce((a,d)=>a+d.units,0);
+  const mx=Math.max(...G.map(g=>donors.filter(d=>d.g===g).length),1);
+  const bars=G.map(g=>{const t=donors.filter(d=>d.g===g).length,e=donors.filter(d=>d.g===g&&elig(d)).length;
+    return `<div class="bar"><div class="pair"><div title="Total: ${t}" style="height:${t/mx*100}%;background:#fecaca"></div><div title="Eligible: ${e}" style="height:${e/mx*100}%;background:var(--red)"></div></div><span class="sub">${g}</span></div>`}).join('');
+  const urg=reqs.filter(r=>r.st==='Open').sort((a,b)=>URGORDER.indexOf(a.urg)-URGORDER.indexOf(b.urg)).slice(0,5)
+    .map(r=>`<div class="item" onclick="match(${r.id})"><div><strong>${r.p}</strong><div class="sub">${r.h}, ${r.city}</div></div><div style="text-align:right">${bg(r.g)}<div class="sub"><span class="bd ${URG[r.urg]}">${r.urg}</span></div></div></div>`).join('')||'<p class="empty">No open requests right now.</p>';
+  const rec=[...dons].sort((a,b)=>a.ago-b.ago).slice(0,6).map(d=>{const x=donors.find(o=>o.id===d.donor);return `<tr><td><strong>${x.name}</strong></td><td>${bg(x.g)}</td><td>${banks[d.bank-1].name}</td><td>${d.units}</td><td>${fmt(d.ago)}</td></tr>`}).join('');
+  page.innerHTML=head('Dashboard','Live overview of donors, requests and donations',`<button class="btn bp" onclick="go('reqs')"><i class="ti ti-plus"></i>New Request</button>`)+
+  `<div class="stats">${[['Total Donors',donors.length,'users','c1'],['Eligible Now',el,'circle-check','c2'],['Open Requests',open,'alert-triangle','c3'],['Units This Month',units,'droplet','c4']].map(s=>`<div class="card stat"><div><div class="l">${s[0]}</div><div class="v">${s[1]}</div></div><div class="ic ${s[3]}"><i class="ti ti-${s[2]}"></i></div></div>`).join('')}</div>
+  <div class="two"><div class="card"><h3>Donors by Blood Group</h3><div class="bars">${bars}</div><div class="leg"><span><span style="background:#fecaca"></span>Total donors</span><span><span style="background:var(--red)"></span>Eligible now</span></div></div>
+  <div class="card"><h3>Urgent Open Requests</h3>${urg}</div></div>
+  <div class="card"><h3>Recent Donations</h3><table><thead><tr><th>Donor</th><th>Group</th><th>Blood Bank</th><th>Units</th><th>Date</th></tr></thead><tbody>${rec}</tbody></table></div>`;
+  done();
+}
+function donorsP(){
+  const list=donors.filter(d=>(!filt.g||d.g===filt.g)&&(!filt.city||d.city.toLowerCase().includes(filt.city.toLowerCase()))&&(!filt.el||elig(d)));
+  page.innerHTML=head('Donors',`${list.length} donor(s) found`)+
+  `<div class="card filters"><select id="fg"><option value="">All groups</option>${G.map(g=>`<option ${filt.g===g?'selected':''}>${g}</option>`).join('')}</select>
+  <input id="fc" placeholder="City, e.g. Jaipur" value="${filt.city}"><select id="fe"><option value="">All donors</option><option value="1" ${filt.el?'selected':''}>Eligible only</option></select>
+  <button class="btn bp" onclick="filt={g:fg.value,city:fc.value,el:fe.value};donorsP()"><i class="ti ti-filter"></i>Filter</button>
+  <button class="btn bg" onclick="filt={g:'',city:'',el:''};donorsP()">Reset</button></div>
+  <div class="card"><table><thead><tr><th>Name</th><th>Group</th><th>Age</th><th>City</th><th>Phone</th><th>Last Donated</th><th>Status</th></tr></thead><tbody>
+  ${list.map(d=>`<tr><td><strong>${d.name}</strong></td><td>${bg(d.g)}</td><td>${d.age}</td><td>${d.city}</td><td>${d.phone}</td><td>${fmt(d.last)}</td><td>${elig(d)?'<span class="bd b-ok">Eligible</span>':`<span class="bd b-warn">Cooldown · ${left(d)} days</span>`}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No donors match these filters.</td></tr>'}</tbody></table></div>`;
+  done();
+}
+function reqsP(){
+  const s=[...reqs].sort((a,b)=>(a.st==='Open'?0:1)-(b.st==='Open'?0:1)||URGORDER.indexOf(a.urg)-URGORDER.indexOf(b.urg));
+  page.innerHTML=head('Blood Requests','Open requests are listed first, sorted by urgency')+
+  `<div class="card"><table><thead><tr><th>Patient</th><th>Group</th><th>Units</th><th>Hospital</th><th>Urgency</th><th>Status</th><th></th></tr></thead><tbody>
+  ${s.map(r=>`<tr><td><strong>${r.p}</strong></td><td>${bg(r.g)}</td><td>${r.got}/${r.u}</td><td>${r.h}<div class="sub">${r.city}</div></td><td><span class="bd ${URG[r.urg]}">${r.urg}</span></td><td><span class="bd ${ST[r.st]}">${r.st}</span></td><td style="text-align:right">${r.st==='Open'?`<button class="btn bp" onclick="match(${r.id})"><i class="ti ti-search"></i>Find donors</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+  done();
+}
+function match(id){
+  setNav('reqs');const r=reqs.find(x=>x.id===id);
+  const m=donors.filter(d=>d.city===r.city&&COMPAT[r.g].includes(d.g)&&elig(d)).sort((a,b)=>(b.g===r.g)-(a.g===r.g));
+  page.innerHTML=head('Matching Donors',`Eligible, compatible donors in ${r.city}`,`<button class="btn bg" onclick="go('reqs')"><i class="ti ti-arrow-left"></i>Back</button>`)+
+  `<div class="card sum">${[['Patient',r.p],['Blood group',bg(r.g)],['Units needed',`${r.got}/${r.u}`],['Urgency',`<span class="bd ${URG[r.urg]}">${r.urg}</span>`]].map(x=>`<div><span class="sub">${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}</div>
+  <div class="card"><h3>${m.length} donor(s) available</h3><table><thead><tr><th>Donor</th><th>Group</th><th>Match</th><th>Phone</th><th>Last Donated</th><th></th></tr></thead><tbody>
+  ${m.map(d=>`<tr><td><strong>${d.name}</strong></td><td>${bg(d.g)}</td><td>${d.g===r.g?'<span class="bd b-ok">Exact</span>':'<span class="bd b-info">Compatible</span>'}</td><td>${d.phone}</td><td>${fmt(d.last)}</td><td style="text-align:right"><button class="btn bp" onclick="donsP(${d.id},${r.id})"><i class="ti ti-heartbeat"></i>Record donation</button></td></tr>`).join('')||`<tr><td colspan="6" class="empty">No eligible compatible donors in ${r.city} right now.</td></tr>`}</tbody></table></div>`;
+  done();
+}
+function donsP(pd=0,pr=0){
+  setNav('dons');
+  page.innerHTML=head('Donations','Every donation starts a 90-day cooldown, enforced by a database trigger')+
+  `<div class="card"><h3>Record a donation</h3><div class="form">
+  <select id="sd">${donors.map(d=>`<option value="${d.id}" ${d.id===pd?'selected':''}>${d.name} (${d.g}, ${d.city})</option>`).join('')}</select>
+  <select id="sb">${banks.map(b=>`<option value="${b.id}">${b.name}, ${b.city}</option>`).join('')}</select>
+  <select id="sr"><option value="">General stock</option>${reqs.filter(r=>r.st==='Open').map(r=>`<option value="${r.id}" ${r.id===pr?'selected':''}>#${r.id} ${r.p} (${r.g}, ${r.city})</option>`).join('')}</select>
+  <button class="btn bp" onclick="save()"><i class="ti ti-check"></i>Save donation</button></div>
+  <p class="hint">Tip: try Aarav Sharma or Priya Meena to see the 90-day trigger reject the donation.</p></div>
+  <div class="card"><table><thead><tr><th>Date</th><th>Donor</th><th>Group</th><th>Blood Bank</th><th>Units</th><th>For Patient</th></tr></thead><tbody>
+  ${[...dons].sort((a,b)=>a.ago-b.ago).map(d=>{const x=donors.find(o=>o.id===d.donor),q=reqs.find(o=>o.id===d.req);return `<tr><td>${fmt(d.ago)}</td><td><strong>${x.name}</strong></td><td>${bg(x.g)}</td><td>${banks[d.bank-1].name}</td><td>${d.units}</td><td>${q?q.p:'—'}</td></tr>`}).join('')}</tbody></table></div>`;
+  done();
+}
+function save(){
+  const d=donors.find(x=>x.id===+sd.value),rid=sr.value?+sr.value:null;
+  if(!elig(d)){msg(false,`Donor is not eligible: 90 days must pass between donations (${left(d)} days left).`);donsP(d.id,rid||0);return}
+  dons.push({donor:d.id,bank:+sb.value,ago:0,units:1,req:rid});d.last=0;
+  if(rid){const r=reqs.find(x=>x.id===rid);r.got++;if(r.got>=r.u)r.st='Fulfilled'}
+  msg(true,`Donation recorded. ${d.name}'s 90-day cooldown has started.`);donsP();
+}
+function banksP(){
+  page.innerHTML=head('Blood Banks',`${banks.length} registered centres`)+
+  `<div class="card"><table><thead><tr><th>Name</th><th>City</th><th>Address</th><th>Donations</th><th>Units Collected</th></tr></thead><tbody>
+  ${banks.map(b=>{const n=dons.filter(d=>d.bank===b.id);return `<tr><td><strong>${b.name}</strong></td><td>${b.city}</td><td>${b.addr}</td><td>${n.length}</td><td>${n.reduce((a,d)=>a+d.units,0)}</td></tr>`}).join('')}</tbody></table></div>`;
+  done();
+}
+function setNav(p){document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('on',n.dataset.p===p))}
+function go(p){setNav(p);({dash,donors:donorsP,reqs:reqsP,dons:()=>donsP(),banks:banksP})[p]()}
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>go(n.dataset.p));
+dash();
+</script>
+</body>
+</html>

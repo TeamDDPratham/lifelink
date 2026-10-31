@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Blood Banks{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>Blood Banks</h1><p>{{ banks|length }} registered centre(s)</p></div>
+</div>
+
+<details class="card mb">
+  <summary><i class="bi bi-plus-circle-fill"></i> Add a blood bank</summary>
+  <form method="post" class="form-grid">
+    <div><label>Name</label><input name="name" required></div>
+    <div><label>City</label><input name="city" required></div>
+    <div><label>Phone</label><input name="phone"></div>
+    <div><label>Address</label><input name="address"></div>
+    <div class="form-actions"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button></div>
+  </form>
+</details>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>City</th><th>Phone</th><th>Address</th><th>Donations</th><th>Units collected</th></tr></thead>
+    <tbody>
+      {% for b in banks %}
+      <tr>
+        <td><strong>{{ b.name }}</strong></td>
+        <td>{{ b.city }}</td>
+        <td>{{ b.phone or '—' }}</td>
+        <td>{{ b.address or '—' }}</td>
+        <td>{{ b.total_donations }}</td>
+        <td>{{ b.total_units }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty">No blood banks yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

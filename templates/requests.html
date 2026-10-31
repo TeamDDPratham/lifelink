@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Requests{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>Blood Requests</h1><p>Open requests are listed first, sorted by urgency</p></div>
+</div>
+
+<details class="card mb" {{ 'open' if not requests }}>
+  <summary><i class="bi bi-plus-circle-fill"></i> Raise a new request</summary>
+  <form method="post" class="form-grid">
+    <div><label>Patient name</label><input name="patient_name" required></div>
+    <div><label>Blood group needed</label>
+      <select name="blood_group">{% for bg in BLOOD_GROUPS %}<option>{{ bg }}</option>{% endfor %}</select></div>
+    <div><label>Units needed</label><input type="number" name="units_needed" min="1" max="10" value="1" required></div>
+    <div><label>Hospital</label><input name="hospital" required></div>
+    <div><label>City</label><input name="city" required></div>
+    <div><label>Urgency</label>
+      <select name="urgency">{% for u in ['Critical','High','Medium','Low'] %}<option {{ 'selected' if u == 'Medium' }}>{{ u }}</option>{% endfor %}</select></div>
+    <div><label>Contact phone</label><input name="contact_phone" pattern="[0-9]{10}" title="10-digit mobile number" required></div>
+    <div class="form-actions"><button class="btn btn-primary"><i class="bi bi-send-fill"></i> Submit request</button></div>
+  </form>
+</details>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Patient</th><th>Group</th><th>Units</th><th>Hospital</th><th>Urgency</th><th>Status</th><th>Raised</th><th></th></tr></thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td><strong>{{ r.patient_name }}</strong><div class="sub">{{ r.contact_phone }}</div></td>
+        <td><span class="badge blood">{{ r.blood_group }}</span></td>
+        <td>{{ r.units_needed }}</td>
+        <td>{{ r.hospital }}<div class="sub">{{ r.city }}</div></td>
+        <td><span class="badge {{ URGENCY_BADGE[r.urgency] }}">{{ r.urgency }}</span></td>
+        <td><span class="badge {{ STATUS_BADGE[r.status] }}">{{ r.status }}</span></td>
+        <td>{{ r.created_at.strftime('%d %b, %I:%M %p') }}</td>
+        <td class="actions">
+          {% if r.status == 'Open' %}
+            <a href="{{ url_for('match_donors', rid=r.request_id) }}" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Find donors</a>
+            <form method="post" action="{{ url_for('cancel_request', rid=r.request_id) }}" class="inline"
+                  onsubmit="return confirm('Cancel this request?')">
+              <button class="btn btn-ghost btn-sm">Cancel</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty">No requests yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

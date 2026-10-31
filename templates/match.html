@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Matching Donors{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>Matching Donors</h1><p>Eligible, blood-compatible donors in {{ req.city }}</p></div>
+  <a href="{{ url_for('blood_requests') }}" class="btn btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<div class="card mb summary">
+  <div><span class="sub">Patient</span><strong>{{ req.patient_name }}</strong></div>
+  <div><span class="sub">Blood group</span><strong><span class="badge blood">{{ req.blood_group }}</span></strong></div>
+  <div><span class="sub">Units needed</span><strong>{{ req.units_needed }}</strong></div>
+  <div><span class="sub">Hospital</span><strong>{{ req.hospital }}</strong></div>
+  <div><span class="sub">Urgency</span><strong><span class="badge {{ URGENCY_BADGE[req.urgency] }}">{{ req.urgency }}</span></strong></div>
+</div>
+
+<div class="card">
+  <h3>{{ matches|length }} donor(s) available</h3>
+  <table>
+    <thead><tr><th>Donor</th><th>Group</th><th>Match</th><th>Age</th><th>Phone</th><th>Last donated</th><th></th></tr></thead>
+    <tbody>
+      {% for m in matches %}
+      <tr>
+        <td><strong>{{ m.name }}</strong></td>
+        <td><span class="badge blood">{{ m.blood_group }}</span></td>
+        <td>{% if m.exact_match %}<span class="badge ok">Exact</span>{% else %}<span class="badge info">Compatible</span>{% endif %}</td>
+        <td>{{ m.age }}</td>
+        <td><a href="tel:{{ m.phone }}">{{ m.phone }}</a></td>
+        <td>{{ m.last_donation_date.strftime('%d %b %Y') if m.last_donation_date else 'Never' }}</td>
+        <td class="actions">
+          <a class="btn btn-primary btn-sm"
+             href="{{ url_for('donations', donor_id=m.donor_id, request_id=req.request_id) }}">
+            <i class="bi bi-heart-pulse"></i> Record donation</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty">No eligible compatible donors in {{ req.city }} right now.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

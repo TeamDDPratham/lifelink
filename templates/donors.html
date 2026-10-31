@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Donors{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>Donors</h1><p>{{ donors|length }} donor(s) found</p></div>
+</div>
+
+<details class="card mb">
+  <summary><i class="bi bi-person-plus-fill"></i> Register a new donor</summary>
+  <form method="post" class="form-grid">
+    <div><label>Full name</label><input name="name" required></div>
+    <div><label>Blood group</label>
+      <select name="blood_group" required>{% for bg in BLOOD_GROUPS %}<option>{{ bg }}</option>{% endfor %}</select></div>
+    <div><label>Gender</label>
+      <select name="gender"><option value="M">Male</option><option value="F">Female</option><option value="O">Other</option></select></div>
+    <div><label>Date of birth</label><input type="date" name="dob" required></div>
+    <div><label>Phone</label><input name="phone" pattern="[0-9]{10}" title="10-digit mobile number" required></div>
+    <div><label>Email (optional)</label><input type="email" name="email"></div>
+    <div><label>City</label><input name="city" required></div>
+    <div class="form-actions"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Save donor</button></div>
+  </form>
+</details>
+
+<div class="card mb">
+  <form method="get" class="filters">
+    <div><label>Blood group</label>
+      <select name="blood_group"><option value="">All groups</option>
+        {% for bg in BLOOD_GROUPS %}<option {{ 'selected' if filters.get('blood_group') == bg }}>{{ bg }}</option>{% endfor %}
+      </select></div>
+    <div><label>City</label><input name="city" value="{{ filters.get('city', '') }}" placeholder="e.g. Jaipur"></div>
+    <div><label>Availability</label>
+      <select name="eligible"><option value="">All donors</option>
+        <option value="1" {{ 'selected' if filters.get('eligible') == '1' }}>Eligible only</option></select></div>
+    <button class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filter</button>
+    <a href="{{ url_for('donors') }}" class="btn btn-ghost">Reset</a>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Group</th><th>Age</th><th>City</th><th>Phone</th><th>Last donated</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for d in donors %}
+      <tr>
+        <td><strong>{{ d.name }}</strong>{% if d.email %}<div class="sub">{{ d.email }}</div>{% endif %}</td>
+        <td><span class="badge blood">{{ d.blood_group }}</span></td>
+        <td>{{ d.age }}</td>
+        <td>{{ d.city }}</td>
+        <td>{{ d.phone }}</td>
+        <td>{{ d.last_donation_date.strftime('%d %b %Y') if d.last_donation_date else 'Never' }}</td>
+        <td>
+          {% if d.days_left %}<span class="badge warn">Cooldown · {{ d.days_left }} days</span>
+          {% else %}<span class="badge ok">Eligible</span>{% endif %}
+        </td>
+        <td class="actions">
+          <form method="post" action="{{ url_for('delete_donor', donor_id=d.donor_id) }}" class="inline"
+                onsubmit="return confirm('Delete this donor and their donation history?')">
+            <button class="icon-btn" title="Delete"><i class="bi bi-trash3"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty">No donors match these filters.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

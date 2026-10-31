@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>Dashboard</h1><p>Live overview of donors, requests and donations</p></div>
+  <a href="{{ url_for('blood_requests') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Request</a>
+</div>
+
+<div class="grid stats mb">
+  {% for label, value, icon, color in [
+      ('Total Donors', stats.donors, 'bi-people-fill', 'bg-blue'),
+      ('Eligible Now', stats.eligible, 'bi-check-circle-fill', 'bg-green'),
+      ('Open Requests', stats.open_requests, 'bi-exclamation-triangle-fill', 'bg-amber'),
+      ('Units This Month', stats.units_month, 'bi-droplet-fill', 'bg-red')] %}
+  <div class="card stat">
+    <div><div class="label">{{ label }}</div><div class="value">{{ value }}</div></div>
+    <div class="icon {{ color }}"><i class="bi {{ icon }}"></i></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid two-col mb">
+  <div class="card">
+    <h3>Donors by Blood Group</h3>
+    <canvas id="groupChart" height="130"></canvas>
+  </div>
+  <div class="card">
+    <h3>Urgent Open Requests</h3>
+    {% for r in urgent %}
+      <a class="req-item" href="{{ url_for('match_donors', rid=r.request_id) }}">
+        <div><strong>{{ r.patient_name }}</strong><div class="sub">{{ r.hospital }}, {{ r.city }}</div></div>
+        <div style="text-align:right">
+          <span class="badge blood">{{ r.blood_group }}</span>
+          <div class="sub"><span class="badge {{ URGENCY_BADGE[r.urgency] }}">{{ r.urgency }}</span></div>
+        </div>
+      </a>
+    {% else %}
+      <p class="empty">No open requests right now.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Recent Donations</h3>
+  <table>
+    <thead><tr><th>Donor</th><th>Group</th><th>Blood Bank</th><th>Units</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for d in recent %}
+      <tr>
+        <td><strong>{{ d.name }}</strong></td>
+        <td><span class="badge blood">{{ d.blood_group }}</span></td>
+        <td>{{ d.bank }}</td>
+        <td>{{ d.units }}</td>
+        <td>{{ d.donation_date.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">No donations yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartData = {{ chart|tojson }};
+  new Chart(document.getElementById('groupChart'), {
+    type: 'bar',
+    data: {
+      labels: chartData.labels,
+      datasets: [
+        { label: 'Total donors', data: chartData.total, backgroundColor: '#fecaca', borderRadius: 6 },
+        { label: 'Eligible now', data: chartData.eligible, backgroundColor: '#dc2626', borderRadius: 6 }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } }
+    }
+  });
+</script>
+{% endblock %}
