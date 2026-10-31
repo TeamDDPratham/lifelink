@@ -80,6 +80,13 @@ def template_globals():
 @app.route("/api/index")
 @app.route("/api")
 def dashboard():
+    if "debug" in request.args:
+        return {
+            "PATH_INFO": request.environ.get("PATH_INFO"),
+            "QUERY_STRING": request.environ.get("QUERY_STRING"),
+            "request_path": request.path,
+            "args": dict(request.args),
+        }
     def count(sql):
         return query(sql, one=True)["c"]
 
