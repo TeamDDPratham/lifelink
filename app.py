@@ -76,6 +76,11 @@ def template_globals():
 
 
 # ---------------- Dashboard ----------------
+@app.errorhandler(404)
+def page_not_found(e):
+    return f"Debug 404: path='{request.path}', url='{request.url}'", 404
+
+
 @app.route("/")
 def dashboard():
     def count(sql):
