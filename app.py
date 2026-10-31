@@ -11,6 +11,31 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
+
+
+class VercelPathMiddleware:
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        qs = environ.get("QUERY_STRING", "")
+        if "__vercel_path" in qs:
+            from urllib.parse import parse_qs, unquote
+            params = parse_qs(qs)
+            if "__vercel_path" in params:
+                raw_path = unquote(params["__vercel_path"][0])
+                if not raw_path.startswith("/"):
+                    raw_path = "/" + raw_path
+                while raw_path.startswith("//"):
+                    raw_path = raw_path[1:]
+                environ["PATH_INFO"] = raw_path
+        elif environ.get("PATH_INFO") in ("/api/index", "/api"):
+            environ["PATH_INFO"] = "/"
+
+        return self.wsgi_app(environ, start_response)
+
+
+app.wsgi_app = VercelPathMiddleware(app.wsgi_app)
 BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
 
@@ -80,13 +105,6 @@ def template_globals():
 @app.route("/api/index")
 @app.route("/api")
 def dashboard():
-    if "debug" in request.args:
-        return {
-            "PATH_INFO": request.environ.get("PATH_INFO"),
-            "QUERY_STRING": request.environ.get("QUERY_STRING"),
-            "request_path": request.path,
-            "args": dict(request.args),
-        }
     def count(sql):
         return query(sql, one=True)["c"]
 
