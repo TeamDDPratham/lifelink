@@ -7,10 +7,10 @@ from flask import Flask, flash, g, redirect, render_template, request, url_for
 
 load_dotenv()
 
-app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
 
